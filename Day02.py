@@ -1,4 +1,5 @@
 # AOC19 day 02
+from intcode import Intcode
 
 
 def load_data(f_name):
@@ -9,4 +10,8 @@ def load_data(f_name):
 
 def run():
     data = load_data("Day02.txt")
-
+    comp = Intcode()
+    comp.load(data)
+    comp.code[1], comp.code[2] = 12, 2
+    comp.run()
+    print(comp.code[0])
