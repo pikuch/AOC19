@@ -12,6 +12,10 @@ class Intcode:
         self.code = list(map(int, code.split(",")))
         self.pc = 0
 
+    def set(self, setup):
+        for pos, val in setup.items():
+            self.code[pos] = val
+
     def run(self):
         self.running = True
         while self.running:
