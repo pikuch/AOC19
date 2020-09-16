@@ -38,7 +38,7 @@ def find_crossings(wires):
             x += dx[direction]
             y += dy[direction]
             steps += 1
-            if (x, y) in places:
+            if (x, y) in places and (x, y) not in crossings:
                 crossings[(x, y)] = (places[(x, y)], steps)
     return crossings
 
@@ -49,3 +49,5 @@ def run():
     crossings = find_crossings(wires)
     closest = sorted(list(crossings.keys()), key=lambda a: abs(a[0]) + abs(a[1]))[0]
     print(f"The closest crossing is {abs(closest[0]) + abs(closest[1])} steps away")
+    shortest_time = sorted(list(crossings.values()), key=lambda a: a[0] + a[1])[0]
+    print(f"The crossing closest in time is {sum(shortest_time)} steps away")
