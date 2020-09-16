@@ -16,38 +16,35 @@ def parse_data(data):
     return wires
 
 
-def list_places(wires):
-    places_list = []
-    dx = {"U": 0, "D": 0, "L": -1, "R": 1}
-    dy = {"U": -1, "D": 1, "L": 0, "R": 0}
-    for wire in wires:
-        places = {}
-        steps = 0
-        x, y = 0, 0
-        for direction, movement in wire:
-            for _ in range(movement):
-                x += dx[direction]
-                y += dy[direction]
-                steps += 1
-                if (x, y) not in places:
-                    places[(x, y)] = steps
-        places_list.append(places)
-    return places_list
-
-
 # finds all the crossings between wires
 def find_crossings(wires):
-    places = list_places(wires)
+    dx = {"U": 0, "D": 0, "L": -1, "R": 1}
+    dy = {"U": -1, "D": 1, "L": 0, "R": 0}
+    places = {}
     crossings = {}
-    for position1, time1 in places[0].items():
-        for position2, time2 in places[1].items():
-            if position1 == position2 and position1 not in crossings:
-                crossings[position1] = time1 + time2
+    steps = 0
+    x, y = 0, 0
+    for direction, movement in wires[0]:
+        for _ in range(movement):
+            x += dx[direction]
+            y += dy[direction]
+            steps += 1
+            if (x, y) not in places:
+                places[(x, y)] = steps
+    steps = 0
+    x, y = 0, 0
+    for direction, movement in wires[1]:
+        for _ in range(movement):
+            x += dx[direction]
+            y += dy[direction]
+            steps += 1
+            if (x, y) in places:
+                crossings[(x, y)] = (places[(x, y)], steps)
     return crossings
 
 
 def run():
-    data = load_data("Day03test.txt")
+    data = load_data("Day03.txt")
     wires = parse_data(data)
     crossings = find_crossings(wires)
     closest = sorted(list(crossings.keys()), key=lambda a: abs(a[0]) + abs(a[1]))[0]
