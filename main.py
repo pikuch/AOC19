@@ -30,4 +30,4 @@ def create_all_files():
 
 
 if __name__ == '__main__':
-    run_day(3)
+    run_day(4)
