@@ -21,7 +21,7 @@ def count_total_orbits(current, level, orbits):
 
 
 def run():
-    data = load_data("Day06test.txt")
+    data = load_data("Day06.txt")
     orbits = parse_orbits(data)
     total_orbits = count_total_orbits("COM", 0, orbits)
     print(f"The total number of direct and indirect orbits is {total_orbits}")
