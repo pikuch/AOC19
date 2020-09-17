@@ -1,4 +1,5 @@
 # AOC19 day 05
+from intcode import Intcode
 
 
 def load_data(f_name):
@@ -9,4 +10,8 @@ def load_data(f_name):
 
 def run():
     data = load_data("Day05.txt")
-
+    comp = Intcode()
+    comp.load(data)
+    comp.inputs.append(1)
+    comp.run()
+    print(f"The outputs of the diagnostic program are: {' '.join(list(map(str, comp.outputs)))}")
