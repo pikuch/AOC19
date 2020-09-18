@@ -1,5 +1,5 @@
 # AOC19 day 10
-from math import gcd
+from math import gcd, atan2, pi
 
 
 def load_data(f_name):
@@ -54,8 +54,32 @@ def find_best_location(asteroids, max_x, max_y):
     return tuple(best)
 
 
+def find_200th_vaporized(asteroids, best_x, best_y):
+    targets = []
+    for aster in asteroids:
+        if not (aster[0] == best_x and aster[1] == best_y):
+            targets.append([aster[0] - best_x, aster[1] - best_y,
+                            True, -atan2(aster[0] - best_x, aster[1] - best_y) + pi/2])
+    targets.sort(key=lambda a: (a[3], abs(a[0]) + abs(a[1])))
+    index = 0
+    vaporized = 0
+    last_angle = None
+    while True:
+        if targets[index][2] and targets[index][3] != last_angle:
+            targets[index][2] = False
+            last_angle = targets[index][3]
+            vaporized += 1
+            if vaporized == 200:
+                return targets[index][0] + best_x, targets[index][1] + best_y
+
+        index = (index + 1) % len(targets)
+
+
 def run():
     data = load_data("Day10.txt").split("\n")
     asteroids, max_x, max_y = parse_asteroids(data)
-    x, y, detected = find_best_location(asteroids, max_x, max_y)
-    print(f"The best place is at {x}, {y} and it detects {detected} asteroids")
+    best_x, best_y, detected = find_best_location(asteroids, max_x, max_y)
+    print(f"The best place is at {best_x}, {best_y} and it detects {detected} asteroids")
+
+    x, y = find_200th_vaporized(asteroids, best_x, best_y)
+    print(f"The 200th asteroid to be vaporized is at {x}, {y}, so the answer is {100*x+y}")
