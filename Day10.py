@@ -55,7 +55,7 @@ def find_best_location(asteroids, max_x, max_y):
 
 
 def run():
-    data = load_data("Day10test.txt").split("\n")
+    data = load_data("Day10.txt").split("\n")
     asteroids, max_x, max_y = parse_asteroids(data)
     x, y, detected = find_best_location(asteroids, max_x, max_y)
     print(f"The best place is at {x}, {y} and it detects {detected} asteroids")
