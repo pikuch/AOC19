@@ -1,4 +1,5 @@
 # AOC19 day 09
+from intcode import Intcode
 
 
 def load_data(f_name):
@@ -9,4 +10,8 @@ def load_data(f_name):
 
 def run():
     data = load_data("Day09.txt")
-
+    comp = Intcode()
+    comp.load(data)
+    comp.add_input(1)
+    comp.run()
+    print(f"The BOOST keycode is {list(comp.outputs)[0]}")

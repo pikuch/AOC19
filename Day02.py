@@ -1,5 +1,5 @@
 # AOC19 day 02
-from intcode import Intcode
+from intcode_v1 import Intcode
 from itertools import product
 
 

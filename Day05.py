@@ -1,5 +1,5 @@
 # AOC19 day 05
-from intcode import Intcode
+from intcode_v1 import Intcode
 
 
 def load_data(f_name):

@@ -5,43 +5,23 @@ class Intcode:
     def __init__(self):
         self.pc = 0
         self.code = []
+        self.rb = 0
         self.inputs = deque()
         self.outputs = deque()
-        self.inst = {1: self.add_pp,
-                     101: self.add_ip,
-                     1001: self.add_pi,
-                     1101: self.add_ii,
-                     2: self.mul_pp,
-                     102: self.mul_ip,
-                     1002: self.mul_pi,
-                     1102: self.mul_ii,
-                     3: self.inp_p,
-                     4: self.outp_p,
-                     104: self.outp_i,
-                     5: self.jit_pp,
-                     105: self.jit_ip,
-                     1005: self.jit_pi,
-                     1105: self.jit_ii,
-                     6: self.jif_pp,
-                     106: self.jif_ip,
-                     1006: self.jif_pi,
-                     1106: self.jif_ii,
-                     7: self.lt_pp,
-                     107: self.lt_ip,
-                     1007: self.lt_pi,
-                     1107: self.lt_ii,
-                     8: self.eq_pp,
-                     108: self.eq_ip,
-                     1008: self.eq_pi,
-                     1108: self.eq_ii,
-                     99: self.halt}
-        self.inst_length = {1: 4, 101: 4, 1001: 4, 1101: 4, 2: 4, 102: 4, 1002: 4, 1102: 4,
-                            3: 2, 4: 2, 104: 2,
-                            5: 3, 105: 3, 1005: 3, 1105: 3, 6: 3, 106: 3, 1006: 3, 1106: 3,
-                            7: 4, 107: 4, 1007: 4, 1107: 4, 8: 4, 108: 4, 1008: 4, 1108: 4,
-                            99: 1}
+        self.inst = {"01": self.add,
+                     "02": self.mul,
+                     "03": self.inp,
+                     "04": self.outp,
+                     "05": self.jit,
+                     "06": self.jif,
+                     "07": self.lt,
+                     "08": self.eq,
+                     "09": self.arb,
+                     "99": self.halt}
+        self.inst_length = {"01": 4, "02": 4, "03": 2, "04": 2, "05": 3, "06": 3, "07": 4, "08": 4, "09": 2, "99": 1}
         self.state = "fresh"
         self.exit_on_output = False
+        self.memory_allocations = 0
 
     def get_asm(self):
         lines = []
@@ -61,172 +41,91 @@ class Intcode:
         self.code = list(map(int, code.split(",")))
         self.inputs.clear()
         self.outputs.clear()
-        self.state = "loaded"
+        self.rb = 0
         self.pc = 0
+        self.state = "loaded"
 
-    def set(self, setup):
-        for pos, val in setup.items():
-            self.code[pos] = val
+    def set_input(self, value):
+        self.inputs = deque()
+        self.inputs.append(value)
+
+    def add_input(self, value):
+        self.inputs.append(value)
+
+    def decode(self, code):
+        s = f"{code:05d}"
+        return s[-2:], s[2::-1]
+
+    def get_addr(self, address, mode):
+        if mode == "0":  # position mode
+            return self.code[address]
+        elif mode == "1":  # immediate mode
+            return address
+        else:  # relative mode
+            return self.rb + self.code[address]
 
     def run(self):
         self.state = "running"
         while self.state == "running":
-            self.inst[self.code[self.pc]]()
+            try:
+                instruction, modes = self.decode(self.code[self.pc])
+                self.inst[instruction](modes)
+            except IndexError:
+                self.code.extend([0]*1000)
+                self.memory_allocations += 1
 
-    def halt(self):
+    def halt(self, modes):
         self.state = "halted"
 
-    def inp_p(self):
+    def inp(self, modes):
         if len(self.inputs):
-            self.code[self.code[self.pc + 1]] = self.inputs.popleft()
+            self.code[self.get_addr(self.pc + 1, modes[0])] = self.inputs.popleft()
             self.pc += 2
         else:
             self.state = "input_wait"
 
-    def outp_p(self):
-        self.outputs.append(self.code[self.code[self.pc + 1]])
+    def outp(self, modes):
+        self.outputs.append(self.code[self.get_addr(self.pc + 1, modes[0])])
         self.pc += 2
         if self.exit_on_output:
             self.state = "output"
 
-    def outp_i(self):
-        self.outputs.append(self.code[self.pc + 1])
+    def add(self, modes):
+        self.code[self.get_addr(self.pc + 3, modes[2])] = self.code[self.get_addr(self.pc + 1, modes[0])] +\
+                                                          self.code[self.get_addr(self.pc + 2, modes[1])]
+        self.pc += 4
+
+    def mul(self, modes):
+        self.code[self.get_addr(self.pc + 3, modes[2])] = self.code[self.get_addr(self.pc + 1, modes[0])] *\
+                                                          self.code[self.get_addr(self.pc + 2, modes[1])]
+        self.pc += 4
+
+    def jit(self, modes):
+        if self.code[self.get_addr(self.pc + 1, modes[0])] != 0:
+            self.pc = self.code[self.get_addr(self.pc + 2, modes[1])]
+        else:
+            self.pc += 3
+
+    def jif(self, modes):
+        if self.code[self.get_addr(self.pc + 1, modes[0])] == 0:
+            self.pc = self.code[self.get_addr(self.pc + 2, modes[1])]
+        else:
+            self.pc += 3
+
+    def lt(self, modes):
+        if self.code[self.get_addr(self.pc + 1, modes[0])] < self.code[self.get_addr(self.pc + 2, modes[1])]:
+            self.code[self.get_addr(self.pc + 3, modes[2])] = 1
+        else:
+            self.code[self.get_addr(self.pc + 3, modes[2])] = 0
+        self.pc += 4
+
+    def eq(self, modes):
+        if self.code[self.get_addr(self.pc + 1, modes[0])] == self.code[self.get_addr(self.pc + 2, modes[1])]:
+            self.code[self.get_addr(self.pc + 3, modes[2])] = 1
+        else:
+            self.code[self.get_addr(self.pc + 3, modes[2])] = 0
+        self.pc += 4
+
+    def arb(self, modes):
+        self.rb += self.code[self.get_addr(self.pc + 1, modes[0])]
         self.pc += 2
-        if self.exit_on_output:
-            self.state = "output"
-
-    def add_pp(self):
-        self.code[self.code[self.pc + 3]] = self.code[self.code[self.pc + 1]] + self.code[self.code[self.pc + 2]]
-        self.pc += 4
-
-    def add_ip(self):
-        self.code[self.code[self.pc + 3]] = self.code[self.pc + 1] + self.code[self.code[self.pc + 2]]
-        self.pc += 4
-
-    def add_pi(self):
-        self.code[self.code[self.pc + 3]] = self.code[self.code[self.pc + 1]] + self.code[self.pc + 2]
-        self.pc += 4
-
-    def add_ii(self):
-        self.code[self.code[self.pc + 3]] = self.code[self.pc + 1] + self.code[self.pc + 2]
-        self.pc += 4
-
-    def mul_pp(self):
-        self.code[self.code[self.pc + 3]] = self.code[self.code[self.pc + 1]] * self.code[self.code[self.pc + 2]]
-        self.pc += 4
-
-    def mul_ip(self):
-        self.code[self.code[self.pc + 3]] = self.code[self.pc + 1] * self.code[self.code[self.pc + 2]]
-        self.pc += 4
-
-    def mul_pi(self):
-        self.code[self.code[self.pc + 3]] = self.code[self.code[self.pc + 1]] * self.code[self.pc + 2]
-        self.pc += 4
-
-    def mul_ii(self):
-        self.code[self.code[self.pc + 3]] = self.code[self.pc + 1] * self.code[self.pc + 2]
-        self.pc += 4
-
-    def jit_pp(self):
-        if self.code[self.code[self.pc + 1]] != 0:
-            self.pc = self.code[self.code[self.pc + 2]]
-        else:
-            self.pc += 3
-
-    def jit_ip(self):
-        if self.code[self.pc + 1] != 0:
-            self.pc = self.code[self.code[self.pc + 2]]
-        else:
-            self.pc += 3
-
-    def jit_pi(self):
-        if self.code[self.code[self.pc + 1]] != 0:
-            self.pc = self.code[self.pc + 2]
-        else:
-            self.pc += 3
-
-    def jit_ii(self):
-        if self.code[self.pc + 1] != 0:
-            self.pc = self.code[self.pc + 2]
-        else:
-            self.pc += 3
-
-    def jif_pp(self):
-        if self.code[self.code[self.pc + 1]] == 0:
-            self.pc = self.code[self.code[self.pc + 2]]
-        else:
-            self.pc += 3
-
-    def jif_ip(self):
-        if self.code[self.pc + 1] == 0:
-            self.pc = self.code[self.code[self.pc + 2]]
-        else:
-            self.pc += 3
-
-    def jif_pi(self):
-        if self.code[self.code[self.pc + 1]] == 0:
-            self.pc = self.code[self.pc + 2]
-        else:
-            self.pc += 3
-
-    def jif_ii(self):
-        if self.code[self.pc + 1] == 0:
-            self.pc = self.code[self.pc + 2]
-        else:
-            self.pc += 3
-
-    def lt_pp(self):
-        if self.code[self.code[self.pc + 1]] < self.code[self.code[self.pc + 2]]:
-            self.code[self.code[self.pc + 3]] = 1
-        else:
-            self.code[self.code[self.pc + 3]] = 0
-        self.pc += 4
-
-    def lt_ip(self):
-        if self.code[self.pc + 1] < self.code[self.code[self.pc + 2]]:
-            self.code[self.code[self.pc + 3]] = 1
-        else:
-            self.code[self.code[self.pc + 3]] = 0
-        self.pc += 4
-
-    def lt_pi(self):
-        if self.code[self.code[self.pc + 1]] < self.code[self.pc + 2]:
-            self.code[self.code[self.pc + 3]] = 1
-        else:
-            self.code[self.code[self.pc + 3]] = 0
-        self.pc += 4
-
-    def lt_ii(self):
-        if self.code[self.pc + 1] < self.code[self.pc + 2]:
-            self.code[self.code[self.pc + 3]] = 1
-        else:
-            self.code[self.code[self.pc + 3]] = 0
-        self.pc += 4
-
-    def eq_pp(self):
-        if self.code[self.code[self.pc + 1]] == self.code[self.code[self.pc + 2]]:
-            self.code[self.code[self.pc + 3]] = 1
-        else:
-            self.code[self.code[self.pc + 3]] = 0
-        self.pc += 4
-
-    def eq_ip(self):
-        if self.code[self.pc + 1] == self.code[self.code[self.pc + 2]]:
-            self.code[self.code[self.pc + 3]] = 1
-        else:
-            self.code[self.code[self.pc + 3]] = 0
-        self.pc += 4
-
-    def eq_pi(self):
-        if self.code[self.code[self.pc + 1]] == self.code[self.pc + 2]:
-            self.code[self.code[self.pc + 3]] = 1
-        else:
-            self.code[self.code[self.pc + 3]] = 0
-        self.pc += 4
-
-    def eq_ii(self):
-        if self.code[self.pc + 1] == self.code[self.pc + 2]:
-            self.code[self.code[self.pc + 3]] = 1
-        else:
-            self.code[self.code[self.pc + 3]] = 0
-        self.pc += 4
