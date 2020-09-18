@@ -14,4 +14,9 @@ def run():
     comp.load(data)
     comp.add_input(1)
     comp.run()
-    print(f"The BOOST keycode is {list(comp.outputs)[0]}")
+    print(f"The BOOST keycode is {comp.get_output()}")
+
+    comp.load(data)
+    comp.add_input(2)
+    comp.run()
+    print(f"The coordinate is {comp.get_output()}")

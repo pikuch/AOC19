@@ -46,11 +46,19 @@ class Intcode:
         self.state = "loaded"
 
     def set_input(self, value):
-        self.inputs = deque()
+        self.inputs.clear()
         self.inputs.append(value)
 
     def add_input(self, value):
         self.inputs.append(value)
+
+    def get_output(self):
+        return self.outputs.popleft()
+
+    def get_all_outputs(self):
+        outp = " ".join(map(str, self.outputs))
+        self.outputs.clear()
+        return outp
 
     def decode(self, code):
         s = f"{code:05d}"
