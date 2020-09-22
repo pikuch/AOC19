@@ -21,7 +21,7 @@ def fft(code, n):
 
 
 def run():
-    data = load_data("Day16test4.txt")
+    data = load_data("Day16.txt")
     code = list(map(int, list(data)))
 
     code = fft(code, 100)
