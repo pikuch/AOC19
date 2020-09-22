@@ -13,4 +13,5 @@ def run():
     arcade = Arcade()
     arcade.load_game(data)
     arcade.run()
+    arcade.draw_screen()
     print(f"The game drew {len([tile for tile in arcade.screen.values() if tile == 2])} tiles")
