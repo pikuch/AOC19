@@ -1,4 +1,5 @@
 # AOC19 day 15
+from repairDroid import RepairDroid
 
 
 def load_data(f_name):
@@ -9,4 +10,9 @@ def load_data(f_name):
 
 def run():
     data = load_data("Day15.txt")
+    droid = RepairDroid()
+    droid.load(data)
+    corridors = {(0, 0): -1}
+    droid.explore(corridors)
+
 
