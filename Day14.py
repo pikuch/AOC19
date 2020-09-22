@@ -36,12 +36,11 @@ def decompose(chem, amount, substance):
                 for ingredient in chem[k]["recipe"]:
                     need[ingredient[1]] += ingredient[0] * times_needed
                 need[k] -= times_needed * chem[k]["output"]
-
     return need["ORE"]
 
 
 def run():
-    data = load_data("Day14test5.txt")
+    data = load_data("Day14.txt")
     chem = parse_recipes(data)
     ore_needed = decompose(chem, 1, "FUEL")
     print(f"We need {ore_needed} ore to produce 1 fuel")
