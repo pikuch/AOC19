@@ -12,6 +12,11 @@ def run():
     data = load_data("Day13.txt")
     arcade = Arcade()
     arcade.load_game(data)
-    arcade.run()
-    arcade.draw_screen()
+    arcade.run(automatic=True)
     print(f"The game drew {len([tile for tile in arcade.screen.values() if tile == 2])} tiles")
+
+    arcade = Arcade()
+    arcade.load_game(data)
+    arcade.insert_coins(10)
+    arcade.run(automatic=True)
+    print(f"Finished! The score is {arcade.screen[(-1, 0)]}")
