@@ -21,11 +21,11 @@ def parse_recipes(data):
     return chem
 
 
-def decompose(chem, amount, substance):
+def decompose(chem, amount):
     need = {}
     for c in chem.keys():
         need[c] = 0
-    need[substance] = amount
+    need["FUEL"] = amount
     unfulfilled = True
     while unfulfilled:
         unfulfilled = False
@@ -39,8 +39,22 @@ def decompose(chem, amount, substance):
     return need["ORE"]
 
 
+def calculate_fuel(chem, ore, ore_needed):
+    guess = ore // ore_needed
+    guess_jump = decompose(chem, guess)
+    while guess_jump > 0:
+        projected_ore = decompose(chem, guess + guess_jump)
+        if projected_ore < ore:
+            guess += guess_jump
+        else:
+            guess_jump //= 2
+    return guess
+
+
 def run():
     data = load_data("Day14.txt")
     chem = parse_recipes(data)
-    ore_needed = decompose(chem, 1, "FUEL")
+    ore_needed = decompose(chem, 1)
     print(f"We need {ore_needed} ore to produce 1 fuel")
+
+    print(f"With 1 trillion ore we could make {calculate_fuel(chem, 10**12, ore_needed)} fuel")
