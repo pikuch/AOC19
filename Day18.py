@@ -1,41 +1,13 @@
 # AOC19 day 18
-import numpy as np
 from itertools import permutations
 from collections import deque
+from doorMaze import DoorMaze
 
 
 def load_data(f_name):
     with open(f_name, "r") as f:
         data_read = f.read()
     return data_read
-
-
-def parse_maze(data):
-    lines = data.split("\n")
-    maze = np.zeros((len(lines), len(lines[0])), dtype=np.uint8)
-    keys = {}
-    doors = {}
-    row0, col0 = 0, 0
-    for row in range(len(lines)):
-        for col in range(len(lines[0])):
-            tile = lines[row][col]
-            if tile == "#":
-                maze[row, col] = 1
-            elif tile == ".":
-                maze[row, col] = 0
-            elif tile == "@":
-                maze[row, col] = 0
-                row0, col0 = row, col
-            else:
-                if tile.isupper():
-                    maze[row, col] = 1
-                    doors[tile] = (row, col)
-                else:
-                    maze[row, col] = 2
-                    keys[tile] = (row, col)
-                    keys[(row, col)] = tile
-
-    return maze, keys, doors, row0, col0
 
 
 def find_distance(maze, keys, doors, row, col, target):
@@ -130,7 +102,9 @@ def shortest_path_fast(maze, keys, doors, row, col):
     return min_dist
 
 
+
 def run():
-    data = load_data("Day18test5.txt")
-    maze, keys, doors, row, col = parse_maze(data)
-    print(f"The shortest path to collect all the keys is {shortest_path_fast(maze, keys, doors, row, col)} steps long")
+    data = load_data("Day18test2.txt")
+    maze = DoorMaze(data)
+    shortest = maze.collect_all_keys()
+    print(f"The shortest path to collect all the keys is shortest steps long")
