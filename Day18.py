@@ -13,3 +13,6 @@ def run():
     maze = DoorMaze(data)
     shortest = maze.collect_all_keys()
     print(f"The shortest path to collect all the keys is {shortest} steps long")
+    maze.split()
+    shortest4 = maze.collect_all_keys_using_4_robots()
+    print(f"The shortest path to collect all the keys using four robots is {shortest4} steps long")
