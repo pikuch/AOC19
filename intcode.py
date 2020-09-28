@@ -75,8 +75,8 @@ class Intcode:
     def run(self):
         self.state = "running"
         while self.state == "running":
+            instruction, modes = self.decode(self.code[self.pc])
             try:
-                instruction, modes = self.decode(self.code[self.pc])
                 self.inst[instruction](modes)
             except IndexError:
                 self.code.extend([0]*1000)
@@ -87,6 +87,8 @@ class Intcode:
 
     def inp(self, modes):
         if len(self.inputs):
+            if self.get_addr(self.pc + 1, modes[0]) >= len(self.code):
+                raise IndexError  # so we don't throw away input!
             self.code[self.get_addr(self.pc + 1, modes[0])] = self.inputs.popleft()
             self.pc += 2
         else:
