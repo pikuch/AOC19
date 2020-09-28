@@ -54,9 +54,8 @@ class DoorMaze:
                     if self.maze[rr, cc] == self.KEY:
                         self.key_distances[(start, self.key_locations[(rr, cc)])] = dist + 1
                         self.key_distances[(self.key_locations[(rr, cc)], start)] = dist + 1
-                    else:
-                        visited.add((rr, cc))
-                        to_check.append((rr, cc, dist + 1))
+                    visited.add((rr, cc))
+                    to_check.append((rr, cc, dist + 1))
 
     def detect_blocking(self):
         visited = set()
@@ -77,12 +76,30 @@ class DoorMaze:
                     elif self.maze[rr, cc] == self.DOOR:
                         self.blockers[self.door_locations[(rr, cc)]] = blockers
                         new_blockers = blockers.copy()
-                        new_blockers.add(self.door_locations[(rr, cc)])
+                        new_blockers.add(self.door_locations[(rr, cc)].lower())
                         visited.add((rr, cc))
                         to_check.append((rr, cc, new_blockers))
                     else:
                         visited.add((rr, cc))
                         to_check.append((rr, cc, blockers))
+
+    def get_distance(self, current, keys, cache):
+        if len(keys) == 0:  # no more keys to visit
+            return 0
+        if (current, str(keys)) in cache:
+            return cache[(current, str(keys))]
+
+        shortest = 9**9
+        for target in keys:
+            if len(self.blockers[target] & keys) == 0:  # not blocked
+                new_keys = keys.copy()
+                new_keys.remove(target)
+                dist = self.key_distances[(current, target)] + self.get_distance(target, new_keys, cache)
+                if dist < shortest:
+                    shortest = dist
+
+        cache[(current, str(keys))] = shortest
+        return shortest
 
     def collect_all_keys(self):
         keys = list(self.keys.keys())
@@ -90,5 +107,7 @@ class DoorMaze:
             self.measure_key_distances_from(start)
         self.detect_blocking()  # what objects are blocked by what doors
 
-        # TODO: just calculate the best path using self.blockers and self.key_distances
-        return None
+        cache = {}
+        keys = set(self.keys.keys())
+        keys.remove("0")
+        return self.get_distance("0", keys, cache)
