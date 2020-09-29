@@ -97,7 +97,7 @@ def find_shortest_path(maze, links, start, stop):
 
 
 def run():
-    data = load_data("Day20test2.txt")
+    data = load_data("Day20.txt")
     maze, links, start, stop = parse_input(data)
     shortest = find_shortest_path(maze, links, start, stop)
     print(f"The shortest path from AA to ZZ is {shortest}")
