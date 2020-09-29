@@ -7,12 +7,14 @@ class SpringDroid:
         self.brain.load(data)
 
     def run(self, code):
-        for c in code:
-            self.brain.add_input(ord(c))
-        self.brain.add_input(ord("\n"))
+        for line in code:
+            for char in line:
+                self.brain.add_input(ord(char))
+            self.brain.add_input(ord("\n"))
         for c in "WALK":
             self.brain.add_input(ord(c))
         self.brain.add_input(ord("\n"))
+
         self.brain.run()
-        output = map(chr, map(int, self.brain.get_all_outputs().split()))
+        output = list(map(int, self.brain.get_all_outputs().split()))
         return output

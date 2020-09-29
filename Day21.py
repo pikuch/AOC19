@@ -11,6 +11,10 @@ def load_data(f_name):
 def run():
     data = load_data("Day21.txt")
     droid = SpringDroid(data)
-    output = droid.run("NOT A J")
+    code = ["OR D J", "OR A T", "AND B T", "AND C T", "NOT T T", "AND T J"]
+    output = droid.run(code)
     for c in output:
-        print(c, end="")
+        if c < 256:
+            print(chr(c), end="")
+        else:
+            print(c)
