@@ -75,8 +75,8 @@ class Intcode:
     def run(self):
         self.state = "running"
         while self.state == "running":
-            instruction, modes = self.decode(self.code[self.pc])
             try:
+                instruction, modes = self.decode(self.code[self.pc])
                 self.inst[instruction](modes)
             except IndexError:
                 self.code.extend([0]*1000)

@@ -1,4 +1,5 @@
 # AOC19 day 21
+from springDroid import SpringDroid
 
 
 def load_data(f_name):
@@ -9,4 +10,7 @@ def load_data(f_name):
 
 def run():
     data = load_data("Day21.txt")
-
+    droid = SpringDroid(data)
+    output = droid.run("NOT A J")
+    for c in output:
+        print(c, end="")
