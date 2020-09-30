@@ -22,6 +22,7 @@ class Intcode:
         self.state = "fresh"
         self.exit_on_output = False
         self.memory_allocations = 0
+        self.instructions_executed = 0
 
     def get_asm(self):
         lines = []
@@ -81,6 +82,7 @@ class Intcode:
             except IndexError:
                 self.code.extend([0]*1000)
                 self.memory_allocations += 1
+            self.instructions_executed += 1
 
     def halt(self, modes):
         self.state = "halted"
