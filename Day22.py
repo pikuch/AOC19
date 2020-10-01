@@ -22,8 +22,23 @@ def parse_operations(data):
     return ops
 
 
+def shuffle(deck, ops):
+    for op in ops:
+        if op[0] == -1:
+            deck = deck[::-1]
+        elif op[0] == 1:
+            deck = deck[op[1]:] + deck[:op[1]]
+        else:  # deal with increment
+            new_deck = deck.copy()
+            for i in range(len(deck)):
+                new_deck[(i*op[1]) % len(deck)] = deck[i]
+            deck = new_deck
+    return deck
+
+
 def run():
-    data = load_data("Day22test.txt")
+    data = load_data("Day22test4.txt")
     ops = parse_operations(data)
     deck = list(range(10))
-
+    deck = shuffle(deck, ops)
+    print(f"Shuffled deck: {' '.join(map(str, deck))}")
