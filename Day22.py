@@ -37,8 +37,9 @@ def shuffle(deck, ops):
 
 
 def run():
-    data = load_data("Day22test4.txt")
+    data = load_data("Day22.txt")
     ops = parse_operations(data)
-    deck = list(range(10))
+    deck = list(range(10007))
     deck = shuffle(deck, ops)
-    print(f"Shuffled deck: {' '.join(map(str, deck))}")
+    #print(f"Shuffled deck: {' '.join(map(str, deck))}")
+    print(f"After shuffling, card 2019 is at position {deck.index(2019)}")
