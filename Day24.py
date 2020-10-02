@@ -51,7 +51,7 @@ def calculate_biodiversity(eris):
 
 
 def run():
-    data = load_data("Day24test.txt")
+    data = load_data("Day24.txt")
     eris = parse_data(data)
     seen = set()
     while True:
