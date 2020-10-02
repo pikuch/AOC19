@@ -84,6 +84,16 @@ class Intcode:
                 self.memory_allocations += 1
             self.instructions_executed += 1
 
+    def step(self):
+        self.state = "stepping"
+        try:
+            instruction, modes = self.decode(self.code[self.pc])
+            self.inst[instruction](modes)
+        except IndexError:
+            self.code.extend([0] * 1000)
+            self.memory_allocations += 1
+        self.instructions_executed += 1
+
     def halt(self, modes):
         self.state = "halted"
 
