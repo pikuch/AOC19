@@ -11,5 +11,9 @@ def load_data(f_name):
 def run():
     data = load_data("Day23.txt")
     net = Network(50, data)
-    addr, x, y = net.simulate()
-    print(f"The first packet sent to address {addr} is {x}, {y}")
+    x, y = net.simulate(stop_on_255=True)
+    print(f"The first packet sent to address 255 is {x}, {y}")
+
+    net = Network(50, data)
+    x, y = net.simulate()
+    print(f"The first packet sent from NAT twice is {x}, {y}")
