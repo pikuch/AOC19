@@ -151,7 +151,7 @@ def count_bugs(reris):
 
 
 def run():
-    data = load_data("Day24test.txt")
+    data = load_data("Day24.txt")
     eris = parse_data(data)
     seen = set()
     while True:
@@ -167,6 +167,9 @@ def run():
     # part 2
 
     reris = parse_recursive(data)
-    for t in range(10):
+    minutes = 200
+    for t in range(minutes):
+        print(f"\rminute {t}", end="")
         infest_recursive(reris)
-    print(f"After 10 minutes there are {count_bugs(reris)} bugs on {len(reris)-2} levels")
+    print()
+    print(f"After {minutes} minutes there are {count_bugs(reris)} bugs on {len(reris)-2} levels")
