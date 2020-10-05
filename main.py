@@ -1,4 +1,4 @@
-# AOC18 main
+# AOC19 main
 
 
 def run_day(n):
